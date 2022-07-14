@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 export const Form = styled.form`
   width: 100%;
@@ -41,6 +41,10 @@ export const Button = styled.button`
   line-height: 1.1;
   text-align: center;
   color: black;
-  background-color: white;
+  background-color: #c1baba;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+  }
 `;

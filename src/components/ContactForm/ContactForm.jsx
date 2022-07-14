@@ -1,16 +1,21 @@
 import { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { getContacts } from 'redux/contacts/contacts-selectors';
-import { changeFilter, addContact } from 'redux/contacts/contacts-actions';
+import {
+  contactsSelectors,
+  contactsActions,
+  contactsOperations,
+} from 'redux/contacts';
 import { Form, Label, LabelName, Input, Button } from './ContactForm.styled';
 
 function ContactForm() {
-  const toastId = useRef(null);
-  const contacts = useSelector(getContacts);
+  const toastIsNameId = useRef(null);
+  const contacts = useSelector(contactsSelectors.getContacts);
+  const isLoading = useSelector(contactsSelectors.getIsAddingContact);
+  const loadingError = useSelector(contactsSelectors.addContactError);
   const dispatch = useDispatch();
 
-  const toastDismiss = () => toast.dismiss(toastId.current);
+  const toastDismiss = () => toast.dismiss(toastIsNameId.current);
 
   const handleSubmit = evt => {
     evt.preventDefault();
@@ -25,14 +30,22 @@ function ContactForm() {
     );
 
     if (isNameInContacts) {
-      toastId.current = toast.warn(`"${nameValue}" is already in contacts`);
+      toastIsNameId.current = toast.warn(
+        `"${nameValue}" is already in contacts`
+      );
     } else {
-      dispatch(addContact({ name: nameValue, number: telValue }));
-      dispatch(changeFilter(''));
+      dispatch(
+        contactsOperations.addContact({ name: nameValue, phone: telValue })
+      );
+      dispatch(contactsActions.changeFilter(''));
     }
 
     form.reset();
   };
+
+  if (!isLoading && loadingError) {
+    toast.error(`Error adding contacts. ${loadingError}`);
+  }
 
   return (
     <Form onSubmit={handleSubmit} onClick={toastDismiss}>
@@ -58,7 +71,9 @@ function ContactForm() {
           required
         />
       </Label>
-      <Button type="submit">Add contact</Button>
+      <Button type="submit" disabled={isLoading}>
+        Add contact
+      </Button>
     </Form>
   );
 }

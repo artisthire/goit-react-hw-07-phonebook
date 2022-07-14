@@ -1,21 +1,17 @@
-import { useDispatch } from 'react-redux';
-import * as actions from 'redux/contacts/contacts-actions';
 import PropTypes from 'prop-types';
 import { Item, Number, Button } from './ContactListItem.styled';
 
-function ContactListItem({ contact }) {
-  const { name, number, id } = contact;
-  const dispatch = useDispatch();
-
-  const onContactRemove = () => {
-    dispatch(actions.removeContact(id));
-    dispatch(actions.changeFilter(''));
-  };
+function ContactListItem({ contact, onContactRemove, isRemoving }) {
+  const { name, phone, id } = contact;
 
   return (
     <Item>
-      {name}: <Number>{number}</Number>{' '}
-      <Button type="button" onClick={onContactRemove}>
+      {name}: <Number>{phone}</Number>{' '}
+      <Button
+        type="button"
+        onClick={() => onContactRemove(id)}
+        disabled={isRemoving}
+      >
         Delete
       </Button>
     </Item>
@@ -23,10 +19,10 @@ function ContactListItem({ contact }) {
 }
 
 ContactListItem.propTypes = {
-  contact: PropTypes.exact({
+  contact: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    number: PropTypes.string.isRequired,
+    phone: PropTypes.string.isRequired,
   }).isRequired,
 };
 

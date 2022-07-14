@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 export const Item = styled.li`
   margin: 0 0 10px 0;
@@ -17,6 +17,10 @@ export const Button = styled.button`
   border-radius: 5px;
   vertical-align: text-bottom;
   font-family: inherit;
-  background-color: white;
+  background-color: #c1baba;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+  }
 `;
