@@ -1,49 +1,54 @@
 import { createReducer, combineReducers } from '@reduxjs/toolkit';
-import * as actions from 'redux/contacts/contacts-actions';
+import { changeFilter } from 'redux/contacts/contacts-actions';
+import {
+  getContacts,
+  addContact,
+  removeContact,
+} from 'redux/contacts/contacts-operations';
 
 const contactsReducer = createReducer([], {
-  [actions.getContactsSuccess]: (_, { payload }) => payload,
-  [actions.addContactSuccess]: (state, { payload }) => {
+  [getContacts.fulfilled]: (_, { payload }) => payload,
+  [addContact.fulfilled]: (state, { payload }) => {
     state.push(payload);
   },
-  [actions.removeContactSuccess]: (state, { payload }) => {
+  [removeContact.fulfilled]: (state, { payload }) => {
     const removeItemIndex = state.findIndex(contact => contact.id === payload);
     state.splice(removeItemIndex, 1);
   },
 });
 
 const filterReducer = createReducer('', {
-  [actions.changeFilter]: (_, { payload }) => payload,
+  [changeFilter]: (_, { payload }) => payload,
 });
 
 const isLoadingReducer = createReducer(
   { getContacts: false, addContact: false, removeContact: false },
   {
-    [actions.getContactsRequest]: state => {
+    [getContacts.pending]: state => {
       state.getContacts = true;
     },
-    [actions.getContactsSuccess]: state => {
+    [getContacts.fulfilled]: state => {
       state.getContacts = false;
     },
-    [actions.getContactsError]: state => {
+    [getContacts.rejected]: state => {
       state.getContacts = false;
     },
-    [actions.addContactRequest]: state => {
+    [addContact.pending]: state => {
       state.addContact = true;
     },
-    [actions.addContactSuccess]: state => {
+    [addContact.fulfilled]: state => {
       state.addContact = false;
     },
-    [actions.addContactError]: state => {
+    [addContact.rejected]: state => {
       state.addContact = false;
     },
-    [actions.removeContactRequest]: state => {
+    [removeContact.pending]: state => {
       state.removeContact = true;
     },
-    [actions.removeContactSuccess]: state => {
+    [removeContact.fulfilled]: state => {
       state.removeContact = false;
     },
-    [actions.removeContactError]: state => {
+    [removeContact.rejected]: state => {
       state.removeContact = false;
     },
   }
@@ -52,13 +57,13 @@ const isLoadingReducer = createReducer(
 const errorReducer = createReducer(
   { getContacts: '', addContact: '', removeContact: '' },
   {
-    [actions.getContactsError]: (state, { payload }) => {
+    [getContacts.rejected]: (state, { payload }) => {
       state.getContacts = payload;
     },
-    [actions.addContactError]: (state, { payload }) => {
+    [addContact.rejected]: (state, { payload }) => {
       state.addContact = payload;
     },
-    [actions.removeContactError]: (state, { payload }) => {
+    [removeContact.rejected]: (state, { payload }) => {
       state.removeContact = payload;
     },
   }

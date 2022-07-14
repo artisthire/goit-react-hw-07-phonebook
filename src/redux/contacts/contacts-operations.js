@@ -1,41 +1,44 @@
 import axios from 'axios';
-import * as actions from './contacts-actions';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const axiosInst = axios.create({
   baseURL: 'https://62ce8647486b6ce82646ca75.mockapi.io',
 });
 
-const getContacts = () => async dispatch => {
-  dispatch(actions.getContactsRequest());
-
-  try {
-    const { data: contacts } = await axiosInst.get(`/contacts`);
-    dispatch(actions.getContactsSuccess(contacts));
-  } catch (err) {
-    dispatch(actions.getContactsError(err.message));
+const getContacts = createAsyncThunk(
+  'contacts/getContacts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data: contacts } = await axiosInst.get(`/contacts`);
+      return contacts;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-};
+);
 
-const addContact = payload => async dispatch => {
-  dispatch(actions.addContactRequest());
-
-  try {
-    const { data: contact } = await axiosInst.post(`/contacts`, payload);
-    dispatch(actions.addContactSuccess(contact));
-  } catch (err) {
-    dispatch(actions.addContactError(err.message));
+const addContact = createAsyncThunk(
+  'contacts/addContact',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const { data: contact } = await axiosInst.post(`/contacts`, payload);
+      return contact;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-};
+);
 
-const removeContact = id => async dispatch => {
-  dispatch(actions.removeContactRequest());
-
-  try {
-    const { data: removedContact } = await axiosInst.delete(`/contacts/${id}`);
-    dispatch(actions.removeContactSuccess(removedContact.id));
-  } catch (err) {
-    dispatch(actions.removeContactError(err.message));
+const removeContact = createAsyncThunk(
+  'contacts/removeContact',
+  async (id, { rejectWithValue }) => {
+    try {
+      await axiosInst.delete(`/contacts/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-};
+);
 
 export { getContacts, addContact, removeContact };
