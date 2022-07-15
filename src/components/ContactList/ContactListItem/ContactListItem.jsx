@@ -24,6 +24,8 @@ ContactListItem.propTypes = {
     name: PropTypes.string.isRequired,
     phone: PropTypes.string.isRequired,
   }).isRequired,
+  onContactRemove: PropTypes.func.isRequired,
+  isRemoving: PropTypes.bool.isRequired,
 };
 
 export default ContactListItem;
