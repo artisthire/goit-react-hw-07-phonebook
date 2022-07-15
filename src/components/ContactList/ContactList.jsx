@@ -1,51 +1,51 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { filterActions, filterSelectors } from 'redux/filter';
 import {
-  contactsSelectors,
-  contactsActions,
-  contactsOperations,
-} from 'redux/contacts';
+  useGetContactsQuery,
+  useRemoveContactMutation,
+} from 'redux/contacts/contacts-api';
 import ContactListItem from 'components/ContactList/ContactListItem';
 import LoadSpinner from 'components/LoadSpinner';
 import { List } from './ContactList.styled';
 
 function ContactList() {
-  const contacts = useSelector(contactsSelectors.getContacts);
-  const filterValue = useSelector(contactsSelectors.getFilterValue);
-  const isLoadingContacts = useSelector(contactsSelectors.getIsLoadingContacts);
-  const isRemovingContact = useSelector(contactsSelectors.getIsRemovingContact);
-  const loadingContactsError = useSelector(contactsSelectors.getContactsError);
-  const removingContactError = useSelector(
-    contactsSelectors.removeContactError
-  );
+  const filter = useSelector(filterSelectors.getFilter);
   const dispatch = useDispatch();
+  const {
+    data: contacts = [],
+    error: getContactsError,
+    isLoading: isLoadingContacts,
+  } = useGetContactsQuery();
+  const [
+    removeContact,
+    { isLoading: isRemovingContact, error: errorRemoveContact },
+  ] = useRemoveContactMutation();
 
-  useEffect(() => {
-    dispatch(contactsOperations.getContacts());
-  }, [dispatch]);
-
-  if (!isLoadingContacts && loadingContactsError) {
-    toast.error(`Error loading contacts. ${loadingContactsError}`);
+  if (!isLoadingContacts && getContactsError) {
+    const { status, data } = getContactsError;
+    toast.error(`Error loading contacts. ${status} ${JSON.stringify(data)}`);
   }
 
-  if (!isRemovingContact && removingContactError) {
-    toast.error(`Error removing contact. ${removingContactError}`);
+  if (!isRemovingContact && errorRemoveContact) {
+    const { status, data } = errorRemoveContact;
+    toast.error(`Error removing contact. ${status} ${JSON.stringify(data)}`);
   }
 
   const visibleContacts = useMemo(() => {
-    const normalizedFilterValue = filterValue.toLowerCase();
+    const normalizedFilterValue = filter.toLowerCase();
 
     const visibleContacts = contacts.filter(({ name }) =>
       name.toLowerCase().includes(normalizedFilterValue)
     );
 
     return visibleContacts;
-  }, [contacts, filterValue]);
+  }, [contacts, filter]);
 
   const handleContactRemove = id => {
-    dispatch(contactsOperations.removeContact(id));
-    dispatch(contactsActions.changeFilter(''));
+    dispatch(filterActions.setFilter(''));
+    removeContact(id);
   };
 
   return (

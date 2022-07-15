@@ -1,54 +1,82 @@
-import { useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { getContactsByName } from 'services/contacts-server-api';
 import {
-  contactsSelectors,
-  contactsActions,
-  contactsOperations,
-} from 'redux/contacts';
+  contactsApi,
+  useAddContactMutation,
+} from 'redux/contacts/contacts-api';
+import { getCashedContacts } from 'redux/contacts/contacts-selectors';
+import { filterActions } from 'redux/filter';
 import { Form, Label, LabelName, Input, Button } from './ContactForm.styled';
 
 function ContactForm() {
+  const [isFindingContacts, setFindingContacts] = useState(false);
   const toastIsNameId = useRef(null);
-  const contacts = useSelector(contactsSelectors.getContacts);
-  const isLoading = useSelector(contactsSelectors.getIsAddingContact);
-  const loadingError = useSelector(contactsSelectors.addContactError);
+  const cashedContacts = useSelector(getCashedContacts);
+  const [addContact, { isLoading: isAddingContact, error: errorAddContact }] =
+    useAddContactMutation();
   const dispatch = useDispatch();
 
-  const toastDismiss = () => toast.dismiss(toastIsNameId.current);
+  const warningToastDismiss = () => toast.dismiss(toastIsNameId.current);
 
-  const handleSubmit = evt => {
+  const handleSubmit = async evt => {
     evt.preventDefault();
-    toastDismiss();
+    warningToastDismiss();
 
     const form = evt.currentTarget;
     const nameValue = form.name.value.trim();
     const telValue = form.number.value.trim();
     const normalizeName = nameValue.toLocaleLowerCase();
-    const isNameInContacts = contacts.some(
-      contact => contact.name.toLocaleLowerCase() === normalizeName
-    );
+    let findedContacts = [];
+
+    try {
+      setFindingContacts(true);
+      findedContacts = await getContactsByName(nameValue.toLocaleLowerCase());
+      setFindingContacts(false);
+    } catch (error) {
+      toast.warn(`Error adding contact. ${error.message}`);
+      setFindingContacts(false);
+      return;
+    }
+
+    const isNameInContacts =
+      findedContacts.length &&
+      findedContacts.some(
+        contact => contact.name.toLocaleLowerCase() === normalizeName
+      );
 
     if (isNameInContacts) {
       toastIsNameId.current = toast.warn(
         `"${nameValue}" is already in contacts`
       );
-    } else {
-      dispatch(
-        contactsOperations.addContact({ name: nameValue, phone: telValue })
-      );
-      dispatch(contactsActions.changeFilter(''));
-    }
 
-    form.reset();
+      const isNameInVisibleContacts = cashedContacts.some(
+        contact => contact.name.toLocaleLowerCase() === normalizeName
+      );
+
+      if (!isNameInVisibleContacts) {
+        dispatch(
+          contactsApi.endpoints.getContacts.initiate(undefined, {
+            subscribe: false,
+            forceRefetch: true,
+          })
+        );
+      }
+    } else {
+      addContact({ name: nameValue, phone: telValue });
+      dispatch(filterActions.setFilter(''));
+      form.reset();
+    }
   };
 
-  if (!isLoading && loadingError) {
-    toast.error(`Error adding contacts. ${loadingError}`);
+  if (!isAddingContact && errorAddContact) {
+    const { status, data } = errorAddContact;
+    toast.error(`Error adding contacts. ${status} ${JSON.stringify(data)}`);
   }
 
   return (
-    <Form onSubmit={handleSubmit} onClick={toastDismiss}>
+    <Form onSubmit={handleSubmit} onClick={warningToastDismiss}>
       <Label>
         <LabelName>Name</LabelName>
         <Input
@@ -71,7 +99,7 @@ function ContactForm() {
           required
         />
       </Label>
-      <Button type="submit" disabled={isLoading}>
+      <Button type="submit" disabled={isFindingContacts || isAddingContact}>
         Add contact
       </Button>
     </Form>
