@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import { filterActions, filterSelectors } from 'redux/filter';
 import {
   useGetContactsQuery,
   useRemoveContactMutation,
 } from 'redux/contacts/contacts-api';
+import { filterActions, filterSelectors } from 'redux/filter';
+import { toastErrorNotification } from 'services/utils';
 import ContactListItem from 'components/ContactList/ContactListItem';
 import LoadSpinner from 'components/LoadSpinner';
 import { List } from './ContactList.styled';
@@ -23,16 +23,6 @@ function ContactList() {
     { isLoading: isRemovingContact, error: errorRemoveContact },
   ] = useRemoveContactMutation();
 
-  if (!isLoadingContacts && getContactsError) {
-    const { status, data } = getContactsError;
-    toast.error(`Error loading contacts. ${status} ${JSON.stringify(data)}`);
-  }
-
-  if (!isRemovingContact && errorRemoveContact) {
-    const { status, data } = errorRemoveContact;
-    toast.error(`Error removing contact. ${status} ${JSON.stringify(data)}`);
-  }
-
   const visibleContacts = useMemo(() => {
     const normalizedFilterValue = filter.toLowerCase();
 
@@ -47,6 +37,14 @@ function ContactList() {
     dispatch(filterActions.setFilter(''));
     removeContact(id);
   };
+
+  if (!isLoadingContacts && getContactsError) {
+    toastErrorNotification.show('Error loading contacts.', getContactsError);
+  }
+
+  if (!isRemovingContact && errorRemoveContact) {
+    toastErrorNotification.show('Error removing contact.', errorRemoveContact);
+  }
 
   return (
     <>

@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { getContactsByName } from 'services/contacts-server-api';
 import {
   contactsApi,
@@ -8,6 +7,7 @@ import {
 } from 'redux/contacts/contacts-api';
 import { getCashedContacts } from 'redux/contacts/contacts-selectors';
 import { filterActions } from 'redux/filter';
+import { toastErrorNotification } from 'services/utils';
 import { Form, Label, LabelName, Input, Button } from './ContactForm.styled';
 
 function ContactForm() {
@@ -18,7 +18,8 @@ function ContactForm() {
     useAddContactMutation();
   const dispatch = useDispatch();
 
-  const warningToastDismiss = () => toast.dismiss(toastIsNameId.current);
+  const warningToastDismiss = () =>
+    toastErrorNotification.hide(toastIsNameId.current);
 
   const handleSubmit = async evt => {
     evt.preventDefault();
@@ -35,7 +36,7 @@ function ContactForm() {
       findedContacts = await getContactsByName(nameValue.toLocaleLowerCase());
       setFindingContacts(false);
     } catch (error) {
-      toast.warn(`Error adding contact. ${error.message}`);
+      toastErrorNotification.show(`Error adding contact. ${error.message}`);
       setFindingContacts(false);
       return;
     }
@@ -47,10 +48,9 @@ function ContactForm() {
       );
 
     if (isNameInContacts) {
-      toastIsNameId.current = toast.warn(
+      toastIsNameId.current = toastErrorNotification.show(
         `"${nameValue}" is already in contacts`
       );
-
       const isNameInVisibleContacts = cashedContacts.some(
         contact => contact.name.toLocaleLowerCase() === normalizeName
       );
@@ -71,8 +71,7 @@ function ContactForm() {
   };
 
   if (!isAddingContact && errorAddContact) {
-    const { status, data } = errorAddContact;
-    toast.error(`Error adding contacts. ${status} ${JSON.stringify(data)}`);
+    toastErrorNotification.show('Error adding contacts.', errorAddContact);
   }
 
   return (
