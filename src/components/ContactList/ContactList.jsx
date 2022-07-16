@@ -5,7 +5,6 @@ import {
   useRemoveContactMutation,
 } from 'redux/contacts/contacts-api';
 import { filterActions, filterSelectors } from 'redux/filter';
-import { toastErrorNotification } from 'services/utils';
 import ContactListItem from 'components/ContactList/ContactListItem';
 import LoadSpinner from 'components/LoadSpinner';
 import { List } from './ContactList.styled';
@@ -13,15 +12,10 @@ import { List } from './ContactList.styled';
 function ContactList() {
   const filter = useSelector(filterSelectors.getFilter);
   const dispatch = useDispatch();
-  const {
-    data: contacts = [],
-    error: getContactsError,
-    isLoading: isLoadingContacts,
-  } = useGetContactsQuery();
-  const [
-    removeContact,
-    { isLoading: isRemovingContact, error: errorRemoveContact },
-  ] = useRemoveContactMutation();
+  const { data: contacts = [], isLoading: isLoadingContacts } =
+    useGetContactsQuery();
+  const [removeContact, { isLoading: isRemovingContact }] =
+    useRemoveContactMutation();
 
   const visibleContacts = useMemo(() => {
     const normalizedFilterValue = filter.toLowerCase();
@@ -37,14 +31,6 @@ function ContactList() {
     dispatch(filterActions.setFilter(''));
     removeContact(id);
   };
-
-  if (!isLoadingContacts && getContactsError) {
-    toastErrorNotification.show('Error loading contacts.', getContactsError);
-  }
-
-  if (!isRemovingContact && errorRemoveContact) {
-    toastErrorNotification.show('Error removing contact.', errorRemoveContact);
-  }
 
   return (
     <>

@@ -14,8 +14,7 @@ function ContactForm() {
   const [isFindingContacts, setFindingContacts] = useState(false);
   const toastIsNameId = useRef(null);
   const cashedContacts = useSelector(getCashedContacts);
-  const [addContact, { isLoading: isAddingContact, error: errorAddContact }] =
-    useAddContactMutation();
+  const [addContact, { isLoading: isAddingContact }] = useAddContactMutation();
   const dispatch = useDispatch();
 
   const warningToastDismiss = () =>
@@ -69,10 +68,6 @@ function ContactForm() {
       form.reset();
     }
   };
-
-  if (!isAddingContact && errorAddContact) {
-    toastErrorNotification.show('Error adding contacts.', errorAddContact);
-  }
 
   return (
     <Form onSubmit={handleSubmit} onClick={warningToastDismiss}>

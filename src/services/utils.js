@@ -1,3 +1,4 @@
+import { isRejectedWithValue } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 
 const toastErrorNotification = {
@@ -15,4 +16,12 @@ const toastErrorNotification = {
   },
 };
 
-export { toastErrorNotification };
+const rtkQueryErrorLogger = _ => next => action => {
+  if (isRejectedWithValue(action)) {
+    toastErrorNotification.show('Error loading data.', action.payload);
+  }
+
+  return next(action);
+};
+
+export { toastErrorNotification, rtkQueryErrorLogger };
