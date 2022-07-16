@@ -18,7 +18,7 @@ const toastErrorNotification = {
 
 const rtkQueryErrorLogger = _ => next => action => {
   if (isRejectedWithValue(action)) {
-    toastErrorNotification.show('Error loading data.', action.payload);
+    toastErrorNotification.show('Error server connection.', action.payload);
   }
 
   return next(action);

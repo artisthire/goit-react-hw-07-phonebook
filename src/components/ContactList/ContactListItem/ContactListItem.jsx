@@ -1,8 +1,19 @@
+import { useDispatch } from 'react-redux';
+import { useRemoveContactMutation } from 'redux/contacts/contacts-api';
+import { filterActions } from 'redux/filter';
 import PropTypes from 'prop-types';
 import { Item, Number, Button } from './ContactListItem.styled';
 
-function ContactListItem({ contact, onContactRemove, isRemoving }) {
+function ContactListItem({ contact }) {
+  const [removeContact, { isLoading: isRemovingContact }] =
+    useRemoveContactMutation();
+  const dispatch = useDispatch();
   const { name, phone, id } = contact;
+
+  const onContactRemove = id => {
+    dispatch(filterActions.setFilter(''));
+    removeContact(id);
+  };
 
   return (
     <Item>
@@ -10,7 +21,7 @@ function ContactListItem({ contact, onContactRemove, isRemoving }) {
       <Button
         type="button"
         onClick={() => onContactRemove(id)}
-        disabled={isRemoving}
+        disabled={isRemovingContact}
       >
         Delete
       </Button>
@@ -24,8 +35,6 @@ ContactListItem.propTypes = {
     name: PropTypes.string.isRequired,
     phone: PropTypes.string.isRequired,
   }).isRequired,
-  onContactRemove: PropTypes.func.isRequired,
-  isRemoving: PropTypes.bool.isRequired,
 };
 
 export default ContactListItem;
