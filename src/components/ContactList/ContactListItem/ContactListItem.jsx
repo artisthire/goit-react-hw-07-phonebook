@@ -12,8 +12,7 @@ function ContactListItem({ contact }) {
   const { name, phone, id } = contact;
 
   const onContactRemove = id => {
-    dispatch(filterActions.setFilter(''));
-    removeContact(id);
+    removeContact(id).finally(() => dispatch(filterActions.setFilter('')));
   };
 
   return (

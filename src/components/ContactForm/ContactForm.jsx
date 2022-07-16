@@ -65,9 +65,10 @@ function ContactForm() {
         );
       }
     } else {
-      addContact({ name: nameValue, phone: telValue });
-      dispatch(filterActions.setFilter(''));
-      form.reset();
+      addContact({ name: nameValue, phone: telValue }).finally(() => {
+        dispatch(filterActions.setFilter(''));
+        form.reset();
+      });
     }
   };
 
