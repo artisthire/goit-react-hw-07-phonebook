@@ -1,7 +1,7 @@
 import { LoadingIcon } from './LoadSpinner.styled';
 
-function LoadSpinner() {
-  return <LoadingIcon />;
+function LoadSpinner(props) {
+  return <LoadingIcon {...props} />;
 }
 
 export default LoadSpinner;

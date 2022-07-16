@@ -8,6 +8,7 @@ import {
 import { getCashedContacts } from 'redux/contacts/contacts-selectors';
 import { filterActions } from 'redux/filter';
 import { toastErrorNotification } from 'services/utils';
+import LoadSpinner from 'components/LoadSpinner';
 import { Form, Label, LabelName, Input, Button } from './ContactForm.styled';
 
 function ContactForm() {
@@ -16,6 +17,7 @@ function ContactForm() {
   const cashedContacts = useSelector(getCashedContacts);
   const [addContact, { isLoading: isAddingContact }] = useAddContactMutation();
   const dispatch = useDispatch();
+  const isLoading = isFindingContacts || isAddingContact;
 
   const warningToastDismiss = () =>
     toastErrorNotification.hide(toastIsNameId.current);
@@ -93,7 +95,8 @@ function ContactForm() {
           required
         />
       </Label>
-      <Button type="submit" disabled={isFindingContacts || isAddingContact}>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading && <LoadSpinner style={{ marginRight: 5 }} />}
         Add contact
       </Button>
     </Form>

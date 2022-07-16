@@ -12,10 +12,6 @@ const rotate = keyframes`
 `;
 
 export const LoadingIcon = styled(ImSpinner9)`
-  display: block;
-  width: 60px;
-  height: 60px;
-  margin: 30px auto;
   color: #7a82b5;
 
   animation: ${rotate} 1s linear infinite;

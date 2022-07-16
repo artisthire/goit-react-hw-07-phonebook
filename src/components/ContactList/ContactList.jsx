@@ -29,7 +29,9 @@ function ContactList() {
           ))}
         </List>
       )}
-      {isLoadingContacts && <LoadSpinner />}
+      {isLoadingContacts && (
+        <LoadSpinner size={60} style={{ margin: '30px auto' }} />
+      )}
     </>
   );
 }
