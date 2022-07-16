@@ -30,7 +30,10 @@ function ContactList() {
         </List>
       )}
       {isLoadingContacts && (
-        <LoadSpinner size={60} style={{ margin: '30px auto' }} />
+        <LoadSpinner
+          size={60}
+          style={{ display: 'block', margin: '30px auto' }}
+        />
       )}
     </>
   );
